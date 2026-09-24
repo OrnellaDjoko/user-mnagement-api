@@ -48,6 +48,16 @@ public class UserController {
     }
 
     @Operation(
+            summary = "Consulter ses informations",
+            description = "Retourne les informations de l'utilisateur connecté"
+    )
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(){
+        return ResponseEntity.ok(userService.getCurrentUser());
+    }
+
+    @Operation(
             summary = "Consulter un utilisateur",
             description = "Retourne un utilisateur à partir de son identifiant"
     )

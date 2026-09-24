@@ -2,16 +2,15 @@ package com.k48.usermanagement.controller;
 
 import com.k48.usermanagement.dto.LoginRequest;
 import com.k48.usermanagement.dto.LoginResponse;
-import com.k48.usermanagement.service.UserService;
+import com.k48.usermanagement.dto.RefreshTokenRequest;
+import com.k48.usermanagement.service.AuthService;
+import com.k48.usermanagement.service.EmailVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class AuthController {
 
-    private final UserService.AuthService authService;
+    private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
 
     @Operation(
             summary = "Authentifier un utilisateur",
@@ -35,6 +35,29 @@ public class AuthController {
     ){
         return ResponseEntity.ok(authService.login(request));
 
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(
+            @Valid @RequestBody RefreshTokenRequest request
+            ){
+        return ResponseEntity.ok(authService.refresh(request.getRefreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @Valid @RequestBody RefreshTokenRequest request
+    ){
+        authService.logout(request.getRefreshToken());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(
+            @RequestParam String token
+    ){
+        emailVerificationService.verifyEmail(token);
+        return ResponseEntity.ok("Email vérifié avec succès");
     }
 
 }
